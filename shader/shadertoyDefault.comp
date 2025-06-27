@@ -1,0 +1,21 @@
+#version 460
+#extension GL_EXT_debug_printf : require
+
+layout(set = 0, binding = 0, rgba8) uniform image2D outputImage;
+
+layout(set = 0, binding = 2) uniform parameters {
+    float time;
+    vec3 globalDimension;
+};
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+void main()
+{
+    // make sure no exceeding thread are execute
+    if (any(greaterThanEqual(gl_GlobalInvocationID, globalDimension))) return;
+
+    vec2 uv = gl_GlobalInvocationID.xy / globalDimension.xy;
+    vec3 color = 0.5 + 0.5*cos(time + uv.xyx + vec3(0,2,4));
+    imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0));
+}

@@ -1,0 +1,46 @@
+#version 460
+#extension GL_EXT_debug_printf : require
+
+layout(set = 0, binding = 0, rgba8) uniform image2D outputImage;
+
+layout(set = 0, binding = 2) uniform parameters {
+    float time;
+    vec3 globalDimension;
+};
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+void main()
+{
+    // make sure no exceeding thread are execute
+    if (any(greaterThanEqual(gl_GlobalInvocationID, globalDimension))) return;
+
+    vec3 iResolution = globalDimension;
+    float iTime = time;
+    vec4 o = vec4(0.0,0.0,0.0,1.0);
+    vec2 u = gl_GlobalInvocationID.xy;
+
+    vec2 v = iResolution.xy;
+         u = 0.2*(u+u-v)/v.y;    
+         
+    vec4 z = o = vec4(1.0,2.0,3.0,0.0);
+     
+    for (float a = 0.5, t = iTime, i; 
+         ++i < 19.0; 
+         o += (1.0 + cos(z+t)) 
+            / length((1.0+i*dot(v,v)) 
+                   * sin(1.5*u/(0.5-dot(u,u)) - 9.0*u.yx + t))
+         )  
+        v = cos(++t - 7.0*u*pow(a += 0.03, i)) - 5.*u, 
+        // use stanh here if shader has black artifacts
+        //   vvvv
+        u += tanh(40.0 * dot(u *= mat2(cos(i + 0.02*t - vec4(0.0,11.0,33.0,0.0)))
+                           ,u)
+                      * cos(1e2*u.yx + t)) / 200.0
+           + 0.2 * a * u
+           + cos(4.0/exp(dot(o,o)/100.0) + t) / 300.0;
+              
+     o = 25.6 / (min(o, 13.0) + 164.0 / o) 
+       - dot(u, u) / 250.0;
+    imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), o);
+}

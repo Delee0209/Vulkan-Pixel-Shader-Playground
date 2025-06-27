@@ -1,0 +1,68 @@
+#version 460
+#extension GL_EXT_debug_printf : require
+
+layout(set = 0, binding = 0, rgba8) uniform image2D outputImage;
+
+layout(set = 0, binding = 2) uniform parameters {
+    float time;
+    vec3 screenDimension;
+};
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+float g(vec4 p, float s) {
+    p *= s;
+    return abs(dot(sin(p), cos(p.zxwy)) - 1.0) / s;
+}
+void main()
+{
+    // make sure no exceeding thread are execute
+    if (any(greaterThanEqual(gl_GlobalInvocationID, screenDimension))) return;
+
+    float separation = ((1.5*cos(time/8.0)+1.0)/2.0) * screenDimension.x;
+    if (gl_GlobalInvocationID.x <= separation) return;
+
+    vec3 iResolution = screenDimension;
+    float iTime = time;
+    vec4 O = vec4(0.0,0.0,0.0,1.0);
+    vec2 C = vec2(gl_GlobalInvocationID.x, iResolution.y - 1 - gl_GlobalInvocationID.y) + 0.5;
+    
+    float i = 0.0, d = 0.0, z = 0.0, s = 0.0;
+    float T = iTime;
+    vec4 o = vec4(0.0), q = vec4(0.0), p = vec4(0.0);
+    vec4 U = vec4(2.0, 1.0, 0.0, 3.0);
+    
+    vec2 r = iResolution.xy;
+
+    for (; ++i < 79.0; ) {
+        z += d + 0.0005;
+
+        q = vec4(normalize(vec3(C - 0.5 * r, r.y)) * z, 0.2);
+        q.z += T / 30.0;
+
+        s = q.y + 0.1;
+        q.y = abs(s);
+
+        p = q;
+        p.y -= 0.11;
+
+        p.xy *= mat2(
+            cos(11.0 * U.z - 2.0 * p.z), cos(33.0 * U.w - 2.0 * p.z),
+            cos(11.0 * U.y - 2.0 * p.z), cos(11.0 * U.z - 2.0 * p.z)
+        );
+        p.y -= 0.2;
+
+        d = abs(g(p, 8.0) - g(p, 24.0)) / 4.0;
+        p = 1.0 + cos(0.7 * U + 5.0 * q.z);
+
+        float glow = s > 0.0 ? 1.0 : 0.1;
+        float atten = max(s > 0.0 ? d : d * d * d, 0.0005);
+
+        o += glow * p.w * p / atten;
+    }
+
+    o += (1.4 + sin(T) * sin(1.7 * T) * sin(2.3 * T)) * 1000.0 * U / length(q.xy);
+
+    O = tanh(o / 100000.0);
+    imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), O);
+}
