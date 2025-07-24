@@ -43,7 +43,7 @@ struct BufferInfo
     void *data;
 };
 ```
-2. add them into the `imageInfos` vector inside `setup.h` and you should be good to go!
+2. add them into the `bufferInfos` vector inside `setup.h` and you should be good to go!
 ```cpp=
 std::vector<BufferInfo> bufferInfos = {
     {.name = "parameters",  .binding = 2, .size = sizeof(parameters),   .usage = uniformBufferUsageFlags,   .memoryProperty = uniformBufferMemoryPropertyFlags,     .descriptorType = uniformBufferDescriptorType,  .data = &parameters},
