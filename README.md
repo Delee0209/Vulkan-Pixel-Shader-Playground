@@ -9,7 +9,7 @@ A lightweight playground for quickly setting up a pixel GLSL shader pipeline (si
 ### Adding image
 - **currently only support storage image (sampled image is planned for future)**
 1. fill in the `ImageInfo` struct
-```cpp=
+```cpp
 struct ImageInfo
 {
     std::string name;
@@ -23,7 +23,7 @@ struct ImageInfo
 ```
 2. add them into the `imageInfos` vector inside `setup.h` and you should be good to go!
     - do note that `binding = 0` is reserve for the output image (for real time output)... so just don't touch the first element in the `imageInfos` vector
-```cpp=
+```cpp
 std::vector<ImageInfo> imageInfos = {
     {.name = "outputImage", .binding = 0, .extent = glm::vec2(width, height), .format = vk::Format::eR8G8B8A8Unorm,        .usage = storageImageUsageFlags, .memoryProperty = storageImageMemoryPropertyFlags, .descriptorType = storageImageDescriptorType},
     {.name = "image",       .binding = 1, .extent = glm::vec2(width, height), .format = vk::Format::eR32G32B32A32Sfloat,   .usage = storageImageUsageFlags, .memoryProperty = storageImageMemoryPropertyFlags, .descriptorType = storageImageDescriptorType},
@@ -31,7 +31,7 @@ std::vector<ImageInfo> imageInfos = {
 ```
 ### Adding Buffer
 1. fill in the `BufferInfo` struct
-```cpp=
+```cpp
 struct BufferInfo
 {
     std::string name;
@@ -44,7 +44,7 @@ struct BufferInfo
 };
 ```
 2. add them into the `bufferInfos` vector inside `setup.h` and you should be good to go!
-```cpp=
+```cpp
 std::vector<BufferInfo> bufferInfos = {
     {.name = "parameters",  .binding = 2, .size = sizeof(parameters),   .usage = uniformBufferUsageFlags,   .memoryProperty = uniformBufferMemoryPropertyFlags,     .descriptorType = uniformBufferDescriptorType,  .data = &parameters},
     {.name = "intArray",    .binding = 3, .size = sizeof(numA),         .usage = storageBufferUsageFlags,   .memoryProperty = storageBufferMemoryPropertyFlags,     .descriptorType = storageBufferDescriptorType,  .data = &numA},
@@ -53,7 +53,7 @@ std::vector<BufferInfo> bufferInfos = {
 ### Adding shader pass
 very similar to how we setup buffer and image!
 1. fill in the `ShaderInfo` struct
-```cpp=
+```cpp
 struct ShaderInfo
 {
     std::string name;
@@ -65,7 +65,7 @@ struct ShaderInfo
 ```
 2. add them into the `shaderInfos` vector inside `setup.h` and you should be good to go!
     - the shader will be execute in the exact order inside the `shaderInfos` vector!
-```cpp=
+```cpp
 const std::vector<ShaderInfo> shaderInfos = {
     {.name = "shadertoyDefault",   .filePath = "../../shader/shadertoyDefault.comp",   .entryPoint = "main", .globalDimension = glm::vec3(width, height, 1), .localDimension = localDimension},
     {.name = "shadertoyTest",   .filePath = "../../shader/shadertoyTest.comp",            .entryPoint = "main", .globalDimension = glm::vec3(width, height, 1), .localDimension = localDimension},
@@ -76,7 +76,7 @@ const std::vector<ShaderInfo> shaderInfos = {
 ### Data initialize and update
 you can initialize the data in buffer by modifying the `initializeDeviceData()`
 - this function will be called at the start of the main program
-```cpp=
+```cpp
 void initializeDeviceData()
 {
     parameters.screenDimension = glm::vec3(width, height, 1);
@@ -86,7 +86,7 @@ void initializeDeviceData()
 
 ```
 similarly, you can also update the buffer data each frame by modifying the `updateDeviceData`
-```cpp=
+```cpp
 void updateDeviceData(const std::vector<Buffer> &buffers, const std::vector<Image> &images)
 {
     end = std::chrono::system_clock::now();
